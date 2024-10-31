@@ -1,0 +1,133 @@
+int numCircles = 100;                  // Number of circles
+int[] numbers = new int[10];          // Array to customize properties
+
+// Arrays to store the properties of each circle
+int[] circleX = new int[numCircles];
+int[] circleY = new int[numCircles];
+int[] circleSpeed = new int[numCircles];
+float[] circleRadius = new float[numCircles];
+boolean[] isMovingRight = new boolean[numCircles];
+char[] circleLabel = new char[numCircles];
+int[] circleColor = new int[numCircles];
+
+// Flower properties
+int numFlowers = 20;
+int[] flowerX = new int[numFlowers];
+int[] flowerY = new int[numFlowers];
+float[] flowerSpeed = new float[numFlowers];
+
+void setup() {
+  size(800, 600);           // Set the canvas size
+  background(0);            // Dark background
+
+  // Assign values to the numbers array for custom properties
+  numbers[0] = 200;
+  numbers[1] = 90;
+  numbers[2] = 100;
+
+  initializeCircles();       // Call function to initialize circles with numbers array values
+  initializeFlowers();       // Call function to initialize flowers
+}
+
+void initializeCircles() {
+  for (int i = 0; i < numCircles; i++) {
+    circleX[i] = int(random(50, width - 50));       // Random X position
+    circleY[i] = int(random(50, height - 50));      // Random Y position
+    
+    // Set circle speed and radius based on numbers array values
+    if (i < numbers.length) {
+      circleSpeed[i] = numbers[i];                  // Speed based on array values
+      circleRadius[i] = numbers[(i + 1) % 3] / 2.0; // Radius as half of next number
+    } else {
+      circleSpeed[i] = int(random(5, 15));          // Random speed for remaining circles
+      circleRadius[i] = random(30, 60);             // Random radius
+    }
+    
+    isMovingRight[i] = random(1) > 0.5;             // Random direction
+    circleLabel[i] = 'C';                           // Initial label
+    circleColor[i] = color(128, 0, 128);            // Initial color (purple)
+  }
+}
+
+void initializeFlowers() {
+  for (int i = 0; i < numFlowers; i++) {
+    flowerX[i] = int(random(width));       // Random X position
+    flowerY[i] = int(random(height));      // Random Y position
+    flowerSpeed[i] = random(1, 3);         // Small random speed for floating effect
+  }
+}
+
+void draw() {
+  background(0);                 // Clear the screen on each frame
+
+  for (int i = 0; i < numCircles; i++) {
+    changeDirection(i);          // Check for edge and reverse direction
+    moveCircle(i);               // Update position based on direction and speed
+    updateColorAndLabel(i);      // Update color and label based on mouse position
+    drawCircle(i);               // Draw the circle
+  }
+
+  // Draw floating flowers
+  for (int i = 0; i < numFlowers; i++) {
+    moveFlower(i);
+    drawFlower(i);
+  }
+}
+
+// Check if the circle hits the screen edges and reverse direction
+void changeDirection(int i) {
+  if (circleX[i] > width - circleRadius[i] / 2 || circleX[i] < circleRadius[i] / 2) {
+    isMovingRight[i] = !isMovingRight[i];
+  }
+}
+
+// Update circle position based on direction and speed
+void moveCircle(int i) {
+  if (isMovingRight[i]) {
+    circleX[i] += circleSpeed[i];
+  } else {
+    circleX[i] -= circleSpeed[i];
+  }
+}
+
+// Update color and label based on mouse position
+void updateColorAndLabel(int i) {
+  if (mouseX < width / 2) {
+    circleColor[i] = color(255, 105, 180);  // Pink
+    circleLabel[i] = 'C';                   // Label set to 'C'
+  } else {
+    circleColor[i] = color(128, 0, 128);    // Purple
+    circleLabel[i] = 'I';                   // Label set to 'I'
+  }
+}
+
+// Draw the circle with updated properties
+void drawCircle(int i) {
+  fill(circleColor[i]);                    // Set color
+  ellipse(circleX[i], circleY[i], circleRadius[i], circleRadius[i]);  // Draw circle
+  fill(255);                               // Set text color
+  textAlign(CENTER, CENTER);               // Center text inside circle
+  textSize(20);
+  text(circleLabel[i], circleX[i], circleY[i]);  // Draw label
+}
+
+// Move flower in a floating motion
+void moveFlower(int i) {
+  flowerY[i] += flowerSpeed[i];
+  if (flowerY[i] > height) {
+    flowerY[i] = 0;  // Reset to top
+    flowerX[i] = int(random(width));  // Randomize X position
+  }
+}
+
+// Draw a simple white flower
+void drawFlower(int i) {
+  fill(255);                           // White color for the flower
+  for (int j = 0; j < 5; j++) {        // Five petal structure
+    float angle = TWO_PI / 5 * j;
+    float petalX = flowerX[i] + cos(angle) * 10;
+    float petalY = flowerY[i] + sin(angle) * 10;
+    ellipse(petalX, petalY, 5, 5);    // Petals
+  }
+  ellipse(flowerX[i], flowerY[i], 5, 5); // Center of the flower
+}
